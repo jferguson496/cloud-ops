@@ -1,0 +1,6 @@
+name: fluentd
+description: fluentd
+version: 1
+apiVersion: v1
+
+appVersion: "v1.14"

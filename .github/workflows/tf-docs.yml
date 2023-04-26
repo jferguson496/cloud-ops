@@ -1,0 +1,44 @@
+name: Generate terraform docs
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - "cloud-ops/terraform/tf_files/**"
+      - ".github/workflows/tf-docs.yml"
+  push:
+    branches:
+      - main
+    paths:
+      - "cloud-ops/terraform/tf_files/**"
+      - ".github/workflows/tf-docs.yml"
+jobs:
+  docs-env:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        ref: main
+
+    - name: Render terraform docs inside the README.md and push changes back to PR branch
+      uses: terraform-docs/gh-actions@v0.11.0
+      with:
+        working-dir: ./terraform/tf_files/envs
+        output-file: README.md
+        output-method: inject
+        git-push: "true"
+        
+  docs-shared:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        ref: main
+
+    - name: Render terraform docs inside the README.md and push changes back to PR branch
+      uses: terraform-docs/gh-actions@v0.11.0
+      with:
+        working-dir: ./terraform/tf_files/shared
+        output-file: README.md
+        output-method: inject
+        git-push: "true"

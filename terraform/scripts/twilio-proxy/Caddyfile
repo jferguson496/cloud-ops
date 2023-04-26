@@ -1,0 +1,51 @@
+{
+    admin off
+}
+
+dev.twilio-proxy.rmcdigital.net {
+    log {
+        output stdout
+        format console
+    }
+
+    basicauth /* {
+        rmc JDJhJDEwJDNDNnFoT1Jyb3NUV1ltY2NaZmxhdHVTV0dsUUZoRDZsaVRnQUNFN3cweGZZTTdoNlBTTW1tCg==
+    }
+
+    reverse_proxy /api/v1/twilio-messaging/* {
+        header_up Host {http.reverse_proxy.upstream.hostport}
+        to https://dev.rmcdigital.net
+    }
+}
+
+staging.twilio-proxy.rmcdigital.net {
+    log {
+        output stdout
+        format console
+    }
+
+    basicauth /* {
+        rmc JDJhJDEwJEFjWlJTazdxbExzOUtkU3l4V2VOTWUxcDNqcUZWSTNxNmZ4cS56dk5Ycmc5dWtKN1R2MjVT
+    }
+
+    reverse_proxy /api/v1/twilio-messaging/* {
+        header_up Host {http.reverse_proxy.upstream.hostport}
+        to https://staging.rmcdigital.net
+    }
+}
+
+uat.twilio-proxy.rmcdigital.net {
+    log {
+        output stdout
+        format console
+    }
+
+    basicauth /* {
+        rmc JDJhJDEwJDZmTzJDVFdMRFBsc21Oc3oyVDZUN090empDcDhjQTNSbzJnYWNIUjg5bjhMWUJpalhxUWhT
+    }
+
+    reverse_proxy /api/v1/twilio-messaging/* {
+        header_up Host {http.reverse_proxy.upstream.hostport}
+        to https://uat.rmcdigital.net
+    }
+}

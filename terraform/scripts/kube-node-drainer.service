@@ -1,0 +1,14 @@
+[Unit]
+Description=Drain this node when instance is shutting down
+Requires=kubelet.service
+After=kubelet.service
+
+[Service]
+Type=oneshot
+RemainAfterExit=true
+ExecStart=/bin/true
+TimeoutStopSec=180s
+ExecStop=/bin/sh -c 'kubectl --kubeconfig /var/lib/kubelet/kubeconfig drain $(hostname) --ignore-daemonsets --delete-local-data --force'
+
+[Install]
+WantedBy=multi-user.target

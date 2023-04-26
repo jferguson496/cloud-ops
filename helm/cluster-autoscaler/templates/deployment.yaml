@@ -1,0 +1,56 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cluster-autoscaler
+  labels:
+    app: cluster-autoscaler
+  annotations:
+    cluster-autoscaler.kubernetes.io/safe-to-evict: "false"
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: cluster-autoscaler
+  template:
+    metadata:
+      labels:
+        app: cluster-autoscaler
+      annotations:
+        prometheus.io/scrape: 'true'
+        prometheus.io/port: '8085'
+    spec:
+      serviceAccountName: cluster-autoscaler
+      containers:
+        - image: k8s.gcr.io/autoscaling/cluster-autoscaler:{{ .Values.appVersion }}
+          name: cluster-autoscaler
+          resources:
+            requests:
+              cpu: {{ .Values.requests.cpu }}
+              memory: {{ .Values.requests.memory }}
+            limits:
+              cpu: {{ .Values.limits.cpu }}
+              memory: {{ .Values.limits.memory }}
+          command:
+            - ./cluster-autoscaler
+            - --v={{ .Values.verbosity }}
+            - --stderrthreshold=info
+            - --cloud-provider=aws
+            - --skip-nodes-with-local-storage=false
+            - --expander=least-waste
+            - --node-group-auto-discovery=asg:tag=k8s.io/cluster-autoscaler/enabled=true,k8s.io/cluster-autoscaler/{{ .Values.cluster_name }}=owned
+            - --balance-similar-node-groups
+            - --skip-nodes-with-system-pods=false
+            - --scale-down-delay-after-add={{ .Values.scale_down.delay_after_add }}
+            - --scale-down-unneeded-time={{ .Values.scale_down.unneeded_time }}
+            - --scale-down-utilization-threshold={{ .Values.scale_down.utilization_threshold }}
+            - --new-pod-scale-up-delay={{ .Values.scale_up.new_pod_delay }}
+          volumeMounts:
+            - name: ssl-certs
+              mountPath: /etc/ssl/certs/ca-bundle.crt
+              readOnly: true
+          imagePullPolicy: "Always"
+      volumes:
+        - name: ssl-certs
+          hostPath:
+            path: "/etc/ssl/certs/ca-bundle.crt"

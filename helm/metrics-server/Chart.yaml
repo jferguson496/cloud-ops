@@ -1,0 +1,5 @@
+name: metrics-server
+description: metrics-server
+version: 1
+apiVersion: v1
+appVersion: "v0.3.7"

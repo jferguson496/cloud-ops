@@ -1,0 +1,25 @@
+---
+appVersion: "v0.9.0"
+aws_role_arn: arn:aws:iam::475588757501:role/eks-service_rmc-digital-prod_external-dns
+domain_filter:
+  - secure.regionalfinance.com
+  - connect.regionalfinance.com
+  - myaccount.regionalfinance.com
+zone_id_filter:
+  - Z03388543G0LWI17OF18O
+  - Z05893852R9BW1EN0I56O
+  - Z04214992XGR5RZT3O71Z
+txt_owner_id: rmc-digital-prod 
+txt_prefix: _externaldns.
+interval: 30s # 15s, 30s, 1m, etc
+log_format: text # text, json
+log_level: info # panic, debug, info, warning, error, fatal
+update_policy: sync
+aws_zone_type: public
+
+requests:
+  cpu: 0.01
+  memory: 32Mi
+limits:
+  cpu: 0.1
+  memory: 64Mi

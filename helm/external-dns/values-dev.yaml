@@ -1,0 +1,23 @@
+---
+appVersion: "v0.11.0"
+aws_role_arn: arn:aws:iam::903527346668:role/eks-service_rmc-digital-dev_external-dns 
+domain_filter:
+  - dev.rmcdigital.net
+  - connect-dev.rmcdigital.net
+zone_id_filter:
+  - Z0568585PCW4VON77STJ
+  - Z056341431W8QDT6BJIWI
+txt_owner_id: rmc-digital-dev
+txt_prefix: _externaldns.
+interval: 30s # 15s, 30s, 1m, etc
+log_format: text # text, json
+log_level: info # panic, debug, info, warning, error, fatal
+update_policy: sync
+aws_zone_type: public
+
+requests:
+  cpu: 0.01
+  memory: 32Mi
+limits:
+  cpu: 0.1
+  memory: 64Mi

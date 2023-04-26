@@ -1,0 +1,6 @@
+name: cluster-autoscaler
+description: cluster-autoscaler
+version: 1
+apiVersion: v1
+
+appVersion: "v1.21.0"

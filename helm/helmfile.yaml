@@ -1,0 +1,43 @@
+---
+environments:
+  prod:
+  uat:
+  staging:
+  dev:
+
+helmDefaults:
+  wait: true
+  timeout: 120
+  atomic: true
+  force: false
+  historyMax: 5
+  createNamespace: true
+  kubeContext: rmc-digital-{{ .Environment.Name }}
+
+releases:
+  - name: metrics-server
+    namespace: kube-system
+    chart: ./{{`{{.Release.Name}}`}}
+  - name: calico
+    namespace: kube-system
+    chart: ./{{`{{.Release.Name}}`}}
+  - name: cluster-autoscaler
+    namespace: kube-system
+    chart: ./{{`{{.Release.Name}}`}}
+    values:
+      - ./{{`{{.Release.Name}}`}}/values-{{ .Environment.Name }}.yaml
+  - name: external-dns
+    namespace: external-dns
+    chart: ./{{`{{.Release.Name}}`}}
+    values:
+      - ./{{`{{.Release.Name}}`}}/values-{{ .Environment.Name }}.yaml
+  - name: fluentd
+    namespace: fluentd
+    chart: ./{{`{{.Release.Name}}`}}
+    values:
+      - ./{{`{{.Release.Name}}`}}/values-{{ .Environment.Name }}.yaml
+  - name: ingress-nginx
+    namespace: ingress-nginx
+    chart: ./{{`{{.Release.Name}}`}}
+    values:
+      - ./{{`{{.Release.Name}}`}}/values-{{ .Environment.Name }}.yaml

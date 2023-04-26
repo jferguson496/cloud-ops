@@ -1,0 +1,18 @@
+---
+appVersion: "v1.21.0"
+verbosity: 0
+aws_role_arn: arn:aws:iam::772628109955:role/eks-service_rmc-digital-staging_cluster-autoscaler
+cluster_name: rmc-digital-staging
+scale_down:
+  delay_after_add: 5m
+  unneeded_time: 5m
+  utilization_threshold: 0.5
+scale_up:
+  new_pod_delay: 60s
+
+requests:
+  cpu: 0.02
+  memory: 32Mi
+limits:
+  cpu: 0.5
+  memory: 512Mi

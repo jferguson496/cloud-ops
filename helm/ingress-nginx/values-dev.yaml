@@ -1,0 +1,17 @@
+---
+appVersion: "v1.1.2"
+env: dev
+
+nodePort: 30080
+externalLoadbalancer: rmc-digital-dev-main-520765229.us-east-1.elb.amazonaws.com 
+
+disruptionBudget: true
+
+updateStatusOnShutdown: false
+
+requests:
+  cpu: 0.03
+  memory: 96Mi
+limits:
+  cpu: 2
+  memory: 512Mi

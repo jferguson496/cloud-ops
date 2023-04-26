@@ -1,0 +1,23 @@
+---
+appVersion: "v0.9.0"
+aws_role_arn: arn:aws:iam::772628109955:role/eks-service_rmc-digital-staging_external-dns
+domain_filter:
+  - staging.rmcdigital.net
+  - connect-staging.rmcdigital.net
+zone_id_filter:
+  - Z06016952HC438B8AJJX6
+  - Z09603242HJ5INKHDU5SH
+txt_owner_id: rmc-digital-staging 
+txt_prefix: _externaldns.
+interval: 30s # 15s, 30s, 1m, etc
+log_format: text # text, json
+log_level: info # panic, debug, info, warning, error, fatal
+update_policy: sync
+aws_zone_type: public
+
+requests:
+  cpu: 0.01
+  memory: 32Mi
+limits:
+  cpu: 0.1
+  memory: 64Mi

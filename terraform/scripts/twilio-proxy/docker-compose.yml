@@ -1,0 +1,13 @@
+version: '3.7'
+
+services:
+  caddy:
+    image: caddy:${version}
+    restart: unless-stopped
+    volumes:
+      - ./config:/config
+      - ./data:/data
+    command: caddy run -watch -config /config/Caddyfile
+    ports:
+      - 80:80
+      - 443:443

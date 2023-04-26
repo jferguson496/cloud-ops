@@ -1,0 +1,68 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: metrics-server
+  labels:
+    kubernetes.io/name: "Metrics-server"
+    kubernetes.io/cluster-service: "true"
+spec:
+  selector:
+    k8s-app: metrics-server
+  ports:
+    - port: 443
+      protocol: TCP
+      targetPort: main-port
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: metrics-server
+  labels:
+    k8s-app: metrics-server
+spec:
+  selector:
+    matchLabels:
+      k8s-app: metrics-server
+  template:
+    metadata:
+      name: metrics-server
+      labels:
+        k8s-app: metrics-server
+    spec:
+      containers:
+        - name: metrics-server
+          image: k8s.gcr.io/metrics-server/metrics-server:{{ .Values.appVersion }}
+          imagePullPolicy: IfNotPresent
+          args:
+            - --cert-dir=/tmp
+            - --secure-port=4443
+            - --metric-resolution={{ .Values.metric_resolution }}
+            - --v={{ .Values.verbosity }}
+            - --kubelet-preferred-address-types=InternalIP,Hostname,ExternalIP
+          ports:
+            - name: main-port
+              containerPort: 4443
+              protocol: TCP
+          securityContext:
+            readOnlyRootFilesystem: true
+            runAsNonRoot: true
+            runAsUser: 1000
+          volumeMounts:
+            - name: tmp-dir
+              mountPath: /tmp
+          resources:
+            requests:
+              cpu: {{.Values.requests.cpu}}
+              memory: {{.Values.requests.memory}}
+            limits:
+              cpu: {{.Values.limits.cpu}}
+              memory: {{.Values.limits.memory}}
+      nodeSelector:
+        kubernetes.io/os: linux
+        kubernetes.io/arch: "amd64"
+      serviceAccountName: metrics-server
+      volumes:
+        - name: tmp-dir
+          emptyDir: {}

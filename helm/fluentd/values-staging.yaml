@@ -1,0 +1,191 @@
+---
+appVersion: "v1.14"
+awsRoleArn: arn:aws:iam::772628109955:role/eks-service_rmc-digital-staging_fluentd
+awsRegion: us-east-1
+clusterName: rmc-digital-staging
+
+logLevel: error
+logRetentionDays: 90
+
+requests:
+  cpu: 0.05
+  memory: 150Mi
+limits:
+  cpu: 0.5
+  memory: 400Mi
+
+config:
+  fluent.conf: |
+    @include containers.conf
+    @include host.conf
+
+    <system>
+      log_level "#{ENV.fetch('LOG_LEVEL')}"
+    </system>
+
+  containers.conf: |
+    <source>
+      @type tail
+      @id in_tail_container_logs
+      @label @containers
+      path /var/log/containers/*.log
+      pos_file /var/lib/fluentd/fluentd-containers.log.pos
+      tag raw.*
+      read_from_head true
+      <parse>
+        @type json
+        time_format %Y-%m-%dT%H:%M:%S.%NZ
+      </parse>
+    </source>
+    <label @containers>
+      <match raw.**>
+        @type detect_exceptions
+        message "log"
+        languages python
+        multiline_flush_interval 1
+        remove_tag_prefix raw
+      </match>
+      # <filter **>
+      #   @type concat
+      #   key log
+      #   multiline_start_regexp ^\d{4}-\d{2}-\d{2}\s\d{2}:\d{2}:\d{2}\.\d+
+      #   continuous_line_regexp ^\s+
+      #   separator ""
+      #   flush_interval 1s
+      # </filter>
+      <filter **>
+        @type kubernetes_metadata
+        @id filter_kube_metadata
+      </filter>
+      <filter **>
+        @type record_transformer
+        enable_ruby
+        <record>
+          extracted_log_group_name /eks/#{ENV.fetch('CLUSTER_NAME')}/${record["kubernetes"]["namespace_name"] == "kube-system" ? "kube-system" : "application"}
+          extracted_log_stream_name ${record["kubernetes"]["namespace_name"]}/${record["kubernetes"]["labels"]["pod"] || record["kubernetes"]["container_name"]}
+        </record>
+      </filter>
+      <match **>
+        @type cloudwatch_logs
+        @id out_cloudwatch_logs_containers
+        region "#{ENV.fetch('REGION')}"
+        log_group_name_key extracted_log_group_name
+        log_stream_name_key extracted_log_stream_name
+        remove_log_group_name_key true
+        remove_log_stream_name_key true
+        auto_create_stream true
+        retention_in_days "#{ENV['RETENTION_IN_DAYS'] || 60}"
+        <buffer>
+          flush_interval 5
+          chunk_limit_size 2m
+          queued_chunks_limit_size 32
+          retry_forever true
+        </buffer>
+      </match>
+    </label>
+
+  host.conf: |
+    <source>
+      @type systemd
+      @id in_systemd_kubelet
+      @label @hostlogs
+      filters [{ "_SYSTEMD_UNIT": "kubelet.service" }]
+      <entry>
+        field_map {"MESSAGE": "message", "_HOSTNAME": "hostname", "_SYSTEMD_UNIT": "systemd_unit"}
+        field_map_strict true
+      </entry>
+      path /var/log/journal
+      <storage>
+        @type local
+        persistent true
+        path /var/lib/fluentd/fluentd-journald-kubelet-pos.json
+      </storage>
+      read_from_head true
+      tag kubelet.service
+    </source>
+
+    <source>
+      @type systemd
+      @id in_systemd_docker
+      @label @hostlogs
+      filters [{ "_SYSTEMD_UNIT": "docker.service" }]
+      <entry>
+        field_map {"MESSAGE": "message", "_HOSTNAME": "hostname", "_SYSTEMD_UNIT": "systemd_unit"}
+        field_map_strict true
+      </entry>
+      path /var/log/journal
+      <storage>
+        @type local
+        persistent true
+        path /var/lib/fluentd/fluentd-journald-docker-pos.json
+      </storage>
+      read_from_head true
+      tag docker.service
+    </source>
+
+    <source>
+      @type tail
+      @id in_tail_dmesg
+      @label @hostlogs
+      path /var/log/dmesg
+      pos_file /var/lib/fluentd/dmesg.log.pos
+      tag dmesg
+      read_from_head true
+      <parse>
+        @type syslog
+      </parse>
+    </source>
+    <source>
+      @type tail
+      @id in_tail_secure
+      @label @hostlogs
+      path /var/log/secure
+      pos_file /var/lib/fluentd/secure.log.pos
+      tag secure
+      read_from_head true
+      <parse>
+        @type syslog
+      </parse>
+    </source>
+    <source>
+      @type tail
+      @id in_tail_messages
+      @label @hostlogs
+      path /var/log/messages
+      pos_file /var/lib/fluentd/messages.log.pos
+      tag messages
+      read_from_head true
+      <parse>
+        @type syslog
+      </parse>
+    </source>
+
+    <label @hostlogs>
+      <filter **>
+        @type kubernetes_metadata
+        @id filter_kube_metadata_systemd
+      </filter>
+      <filter **>
+        @type record_transformer
+        @id filter_systemd_stream_transformer
+        <record>
+          extracted_log_stream_name "${tag}-#{ENV.fetch('NODE_NAME')}"
+        </record>
+      </filter>
+      <match **>
+        @type cloudwatch_logs
+        @id out_cloudwatch_logs_systemd
+        region "#{ENV.fetch('REGION')}"
+        log_group_name "/eks/#{ENV.fetch('CLUSTER_NAME')}/host"
+        log_stream_name_key extracted_log_stream_name
+        remove_log_stream_name_key true
+        auto_create_stream true
+        retention_in_days "#{ENV['RETENTION_IN_DAYS'] || 60}"
+        <buffer>
+          flush_interval 5
+          chunk_limit_size 2m
+          queued_chunks_limit_size 32
+          retry_forever true
+        </buffer>
+      </match>
+    </label>

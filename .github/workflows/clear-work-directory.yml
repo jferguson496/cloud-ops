@@ -1,0 +1,15 @@
+name: Clean Work Directory
+on:
+  workflow_dispatch:
+     
+jobs:
+  clean-working-directory:
+    runs-on: tivix
+    steps:
+      - name: Clean working directory
+        shell: bash
+        run: |
+         cd $RUNNER_WORKSPACE
+         cd ..
+         pwd
+         ls

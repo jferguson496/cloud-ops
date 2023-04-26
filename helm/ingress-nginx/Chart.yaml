@@ -1,0 +1,7 @@
+---
+name: ingress-nginx
+description: ingress-nginx
+version: 1
+apiVersion: v1
+
+appVersion: "v1.1.2"

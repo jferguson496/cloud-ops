@@ -1,0 +1,12 @@
+url = https://dev.rmc.tivixlabs.com/lp/get-a-loan
+
+time = 120m
+concurrent = 12
+delay = 1
+
+
+fullurl = true
+gmethod = HEAD
+verbose = true
+quiet = false
+timestamp = true

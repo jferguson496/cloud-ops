@@ -1,0 +1,17 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ingress-nginx-controller
+spec:
+  type: NodePort
+  externalTrafficPolicy: Local
+  selector:
+    app: ingress-nginx-controller
+  ports:
+    - name: http
+      nodePort: {{ .Values.nodePort }}
+      port: 80
+      targetPort: http
+      protocol: TCP
+      

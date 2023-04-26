@@ -1,0 +1,23 @@
+---
+appVersion: "v0.9.0"
+aws_role_arn: arn:aws:iam::398761216938:role/eks-service_rmc-digital-uat_external-dns
+domain_filter:
+  - uat.rmcdigital.net
+  - connect-uat.rmcdigital.net
+zone_id_filter:
+  - Z06759713T1OX4N7PXCGU
+  - Z0561447EBGW26JMEV1I
+txt_owner_id: rmc-digital-uat 
+txt_prefix: _externaldns.
+interval: 30s # 15s, 30s, 1m, etc
+log_format: text # text, json
+log_level: info # panic, debug, info, warning, error, fatal
+update_policy: sync
+aws_zone_type: public
+
+requests:
+  cpu: 0.01
+  memory: 32Mi
+limits:
+  cpu: 0.1
+  memory: 64Mi

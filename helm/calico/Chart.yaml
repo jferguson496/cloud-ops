@@ -1,0 +1,5 @@
+name: calico
+description: calico
+version: 1
+apiVersion: v1
+appVersion: "v3.19.4"

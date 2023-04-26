@@ -1,0 +1,8 @@
+**/.terragrunt-cache
+test/
+.terraform/
+terraform.tfstate
+terraform.tfstate.backup
+terraform.tfvars
+.terraform.lock.hcl
+*.bak
